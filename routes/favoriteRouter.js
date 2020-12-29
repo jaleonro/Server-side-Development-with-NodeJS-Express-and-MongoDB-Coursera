@@ -14,12 +14,12 @@ favoriteRouter.route('/')
     Favorites.findOne({user: req.user._id})
     .populate('user')
     .populate('dishes')
-    .then((favorite) => {        
+    .exec((err,favorite) => {
+        if (err) return next(err);        
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
         res.json(favorite);        
-    }, (err) => next(err))
-    .catch((err) => next(err));
+    })
 })
 .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
     Favorites.findOne({user: req.user._id})
@@ -116,7 +116,7 @@ favoriteRouter.route('/:dishId')
     Favorites.findOne({user: req.user._id})    
     .then((favorite) => {
         if (favorite != null) {                        
-            if (favorite.dishes.indexOf(req.body[i]._id) === -1 && Dishes.findById(req.params.dishId) != null) {
+            if (favorite.dishes.indexOf(req.params.dishId) === -1 && Dishes.findById(req.params.dishId) != null) {
                 favorite.dishes.push(req.params.dishId);  
                 favorite.save()
                 .then((favorite) => {
